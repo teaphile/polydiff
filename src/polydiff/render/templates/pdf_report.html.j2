@@ -1,0 +1,70 @@
+<h2>PDF Diff Report</h2>
+
+<div class="summary {% if not result.changed %}identical{% elif result.similarity > 0.8 %}minor-changes{% else %}major-changes{% endif %}">
+    <strong>Overall Similarity:</strong> {{ similarity_percent }} — {{ summary }}
+</div>
+
+{% if pages_added %}
+<div class="summary added">
+    <strong>Pages added:</strong> {{ pages_added | join(', ') }}
+</div>
+{% endif %}
+
+{% if pages_removed %}
+<div class="summary removed">
+    <strong>Pages removed:</strong> {{ pages_removed | join(', ') }}
+</div>
+{% endif %}
+
+<h3>Page-by-Page Comparison</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Page</th>
+            <th>Visual Similarity</th>
+            <th>Text Changed</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for page in pages %}
+        <tr class="{% if page.text_changed %}changed{% endif %}">
+            <td>{{ page.number }}</td>
+            <td>{{ "%.1f"|format(page.visual_similarity * 100) }}%</td>
+            <td>{% if page.text_changed %}Yes{% else %}No{% endif %}</td>
+            <td>
+                {% if page.text_diff %}
+                <details>
+                    <summary>View text diff</summary>
+                    <pre>{{ page.text_diff }}</pre>
+                </details>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if show_thumbnails %}
+<h3>Page Thumbnails</h3>
+<div class="side-by-side">
+    <div>
+        <h4>Original</h4>
+        {% for page in pages %}
+        <div style="margin-bottom: 16px;">
+            <strong>Page {{ page.number }}</strong><br>
+            <img src="{{ page.old_thumbnail }}" alt="Original page {{ page.number }}">
+        </div>
+        {% endfor %}
+    </div>
+    <div>
+        <h4>Modified</h4>
+        {% for page in pages %}
+        <div style="margin-bottom: 16px;">
+            <strong>Page {{ page.number }}</strong><br>
+            <img src="{{ page.new_thumbnail }}" alt="Modified page {{ page.number }}">
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

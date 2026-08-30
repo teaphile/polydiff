@@ -1,0 +1,10 @@
+# added by polydiff — do not edit this block manually
+*.png	diff=polydiff-image
+*.jpg	diff=polydiff-image
+*.jpeg	diff=polydiff-image
+*.webp	diff=polydiff-image
+*.bmp	diff=polydiff-image
+*.gif	diff=polydiff-image
+*.pdf	diff=polydiff-pdf
+*.xlsx	diff=polydiff-xlsx
+*.xlsm	diff=polydiff-xlsx

@@ -1,0 +1,70 @@
+<h2>Excel Diff Report</h2>
+
+<div class="summary {% if not result.changed %}identical{% elif result.similarity > 0.8 %}minor-changes{% else %}major-changes{% endif %}">
+    <strong>Overall Similarity:</strong> {{ similarity_percent }} — {{ summary }}
+</div>
+
+{% if sheets_added %}
+<div class="summary added">
+    <strong>Sheets added:</strong> {{ sheets_added | join(', ') }}
+</div>
+{% endif %}
+
+{% if sheets_removed %}
+<div class="summary removed">
+    <strong>Sheets removed:</strong> {{ sheets_removed | join(', ') }}
+</div>
+{% endif %}
+
+{% for sheet_name, sheet_data in sheets.items() %}
+<h3>Sheet: {{ sheet_name }}</h3>
+
+{% if sheet_data.rows_added %}
+<div class="summary added">
+    <strong>Rows added:</strong> {{ sheet_data.rows_added | length }}
+</div>
+{% endif %}
+
+{% if sheet_data.rows_removed %}
+<div class="summary removed">
+    <strong>Rows removed:</strong> {{ sheet_data.rows_removed | length }}
+</div>
+{% endif %}
+
+{% if sheet_data.columns_added %}
+<div class="summary added">
+    <strong>Columns added:</strong> {{ sheet_data.columns_added | join(', ') }}
+</div>
+{% endif %}
+
+{% if sheet_data.columns_removed %}
+<div class="summary removed">
+    <strong>Columns removed:</strong> {{ sheet_data.columns_removed | join(', ') }}
+</div>
+{% endif %}
+
+{% if sheet_data.changes %}
+<table>
+    <thead>
+        <tr>
+            <th>Cell</th>
+            <th>Old Value</th>
+            <th>New Value</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for change in sheet_data.changes %}
+        <tr class="changed">
+            <td>{{ change.cell }}</td>
+            <td>{{ change.old_value }}</td>
+            <td>{{ change.new_value }}</td>
+            <td>{{ change.type }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>No cell changes in this sheet.</em></p>
+{% endif %}
+{% endfor %}

@@ -1,0 +1,34 @@
+<h2>Image Diff Report</h2>
+
+<div class="summary {% if not result.changed %}identical{% elif result.similarity > 0.8 %}minor-changes{% else %}major-changes{% endif %}">
+    <strong>Similarity:</strong> {{ similarity_percent }} — {{ summary }}
+</div>
+
+{% if result.changed and artifact_path %}
+<h3>Visual Comparison</h3>
+<div class="side-by-side">
+    <div>
+        <h4>Original</h4>
+        <img src="{{ old_image }}" alt="Original image">
+    </div>
+    <div>
+        <h4>Modified</h4>
+        <img src="{{ new_image }}" alt="Modified image">
+    </div>
+</div>
+
+<h3>Diff Overlay</h3>
+<img src="{{ artifact_path }}" alt="Diff overlay showing changed regions">
+{% endif %}
+
+{% if dimensions_changed %}
+<div class="summary minor-changes">
+    <strong>Dimension change:</strong> {{ old_dimensions }} → {{ new_dimensions }}
+</div>
+{% endif %}
+
+{% if size_changed %}
+<div class="summary minor-changes">
+    <strong>File size change:</strong> {{ old_size }} → {{ new_size }}
+</div>
+{% endif %}
