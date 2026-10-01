@@ -93,3 +93,23 @@ class TestPdfDiffPlugin:
 
         assert "Hello World" in text
         assert "test document" in text
+
+    def test_html_output_escapes_text_diff(self, plugin):
+        """Test that HTML output escapes embedded text diff content."""
+        html = plugin._build_html_output(
+            page_results=[
+                {
+                    "number": 1,
+                    "visual_similarity": 0.95,
+                    "text_changed": True,
+                    "text_diff": "<script>alert('xss')</script>",
+                }
+            ],
+            pages_added=[],
+            pages_removed=[],
+            similarity=0.95,
+            summary="changed",
+        )
+
+        assert "<script>alert('xss')</script>" not in html
+        assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html

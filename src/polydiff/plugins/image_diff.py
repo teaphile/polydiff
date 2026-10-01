@@ -3,7 +3,6 @@
 import base64
 import io
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image
 
@@ -13,7 +12,6 @@ from ..utils.image_ops import (
     compute_ssim,
     create_diff_overlay,
     create_side_by_side,
-    downsample_image,
 )
 
 
@@ -58,7 +56,7 @@ class ImageDiffPlugin(DiffPlugin):
         side_by_side = create_side_by_side(image_a, image_b, diff_overlay)
 
         # Determine if changed
-        changed = similarity < 0.99  # Allow tiny floating point differences
+        changed = similarity < options.similarity_threshold
 
         # Build summary
         summary_parts = []

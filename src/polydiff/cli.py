@@ -13,8 +13,6 @@ from .core.delegation import get_available_delegations, get_missing_delegations
 from .core.git_integration import (
     install_polydiff,
     parse_diff_driver_args,
-    setup_git_config,
-    write_gitattributes,
 )
 from .core.plugin_base import DiffOptions
 from .core.registry import registry
@@ -60,6 +58,17 @@ def diff(
         True, "--color/--no-color",
         help="Enable/disable colored output"
     ),
+    context_lines: int = typer.Option(
+        3, "--context-lines", "-c",
+        min=0,
+        help="Context lines for text diffs (e.g., PDF text changes)"
+    ),
+    similarity_threshold: float = typer.Option(
+        0.99, "--similarity-threshold",
+        min=0.0,
+        max=1.0,
+        help="Threshold below which files are considered changed"
+    ),
 ):
     """Compare two files directly (works with or without git)."""
     # Validate files exist
@@ -85,6 +94,8 @@ def diff(
     options = DiffOptions(
         output_format=format,
         output_path=output,
+        context_lines=context_lines,
+        similarity_threshold=similarity_threshold,
         color=color,
     )
 

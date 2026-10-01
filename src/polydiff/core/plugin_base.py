@@ -13,6 +13,7 @@ class DiffOptions:
     output_format: str = "terminal"  # "terminal" | "html" | "json" | "image"
     output_path: Optional[Path] = None
     context_lines: int = 3  # for text-layer diffs inside plugins (PDF text, etc.)
+    similarity_threshold: float = 0.99  # changed if similarity < threshold
     color: bool = True
 
 
