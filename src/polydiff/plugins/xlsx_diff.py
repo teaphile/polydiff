@@ -1,7 +1,7 @@
 """XLSX diff plugin for polydiff."""
 
 from pathlib import Path
-from typing import Any, Optional
+from html import escape
 
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
@@ -72,7 +72,12 @@ class XlsxDiffPlugin(DiffPlugin):
             diff["rows_added"] or diff["rows_removed"] or diff["columns_added"] or diff["columns_removed"]
             for diff in sheet_diffs.values()
         )
-        changed = similarity < 0.99 or bool(sheets_added) or bool(sheets_removed) or has_structural_changes
+        changed = (
+            similarity < options.similarity_threshold
+            or bool(sheets_added)
+            or bool(sheets_removed)
+            or has_structural_changes
+        )
 
         # Build summary
         summary_parts = []
@@ -301,9 +306,15 @@ class XlsxDiffPlugin(DiffPlugin):
         ]
 
         if sheets_added:
-            html_parts.append(f'<div class="summary added"><strong>Sheets added:</strong> {", ".join(sheets_added)}</div>')
+            html_parts.append(
+                f'<div class="summary added"><strong>Sheets added:</strong> '
+                f'{", ".join(escape(name) for name in sheets_added)}</div>'
+            )
         if sheets_removed:
-            html_parts.append(f'<div class="summary removed"><strong>Sheets removed:</strong> {", ".join(sheets_removed)}</div>')
+            html_parts.append(
+                f'<div class="summary removed"><strong>Sheets removed:</strong> '
+                f'{", ".join(escape(name) for name in sheets_removed)}</div>'
+            )
 
         # Per-sheet tables
         for sheet_name, diff in sheet_diffs.items():
@@ -312,7 +323,7 @@ class XlsxDiffPlugin(DiffPlugin):
                 continue
 
             html_parts.extend([
-                f'<h3>Sheet: {sheet_name}</h3>',
+                f'<h3>Sheet: {escape(sheet_name)}</h3>',
             ])
 
             if diff["rows_added"]:
@@ -320,9 +331,15 @@ class XlsxDiffPlugin(DiffPlugin):
             if diff["rows_removed"]:
                 html_parts.append(f'<div class="summary removed"><strong>Rows removed:</strong> {len(diff["rows_removed"])}</div>')
             if diff["columns_added"]:
-                html_parts.append(f'<div class="summary added"><strong>Columns added:</strong> {", ".join(diff["columns_added"])}</div>')
+                html_parts.append(
+                    f'<div class="summary added"><strong>Columns added:</strong> '
+                    f'{", ".join(escape(col) for col in diff["columns_added"])}</div>'
+                )
             if diff["columns_removed"]:
-                html_parts.append(f'<div class="summary removed"><strong>Columns removed:</strong> {", ".join(diff["columns_removed"])}</div>')
+                html_parts.append(
+                    f'<div class="summary removed"><strong>Columns removed:</strong> '
+                    f'{", ".join(escape(col) for col in diff["columns_removed"])}</div>'
+                )
 
             if changes:
                 html_parts.extend([
@@ -339,14 +356,14 @@ class XlsxDiffPlugin(DiffPlugin):
                 ])
 
                 for change in changes[:100]:  # Limit to 100 in HTML
-                    old_val = str(change["old_value"]) if change["old_value"] is not None else ""
-                    new_val = str(change["new_value"]) if change["new_value"] is not None else ""
+                    old_val = escape(str(change["old_value"])) if change["old_value"] is not None else ""
+                    new_val = escape(str(change["new_value"])) if change["new_value"] is not None else ""
                     html_parts.extend([
                         '        <tr class="changed">',
-                        f'            <td>{change["cell"]}</td>',
+                        f'            <td>{escape(change["cell"])}</td>',
                         f'            <td>{old_val}</td>',
                         f'            <td>{new_val}</td>',
-                        f'            <td>{change["type"]}</td>',
+                        f'            <td>{escape(change["type"])}</td>',
                         '        </tr>',
                     ])
 

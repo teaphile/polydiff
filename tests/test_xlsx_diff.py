@@ -106,3 +106,34 @@ class TestXlsxDiffPlugin:
         )
 
         assert "sheet" in result.terminal_output.lower() or "cell" in result.terminal_output.lower()
+
+    def test_html_output_escapes_cell_values(self, plugin):
+        """Test that HTML output escapes sheet names and cell values."""
+        html = plugin._build_html_output(
+            sheet_diffs={
+                "<sheet>": {
+                    "changes": [
+                        {
+                            "cell": "A1",
+                            "old_value": "<b>old</b>",
+                            "new_value": "<script>alert(1)</script>",
+                            "type": "value",
+                        }
+                    ],
+                    "rows_added": [],
+                    "rows_removed": [],
+                    "columns_added": [],
+                    "columns_removed": [],
+                }
+            },
+            sheets_added=["<new-sheet>"],
+            sheets_removed=[],
+            similarity=0.7,
+            summary="changed",
+        )
+
+        assert "<script>alert(1)</script>" not in html
+        assert "<b>old</b>" not in html
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+        assert "&lt;b&gt;old&lt;/b&gt;" in html
+        assert "&lt;sheet&gt;" in html

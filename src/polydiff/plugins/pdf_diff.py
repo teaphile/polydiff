@@ -1,14 +1,14 @@
 """PDF diff plugin for polydiff."""
 
 import difflib
+from html import escape
 from pathlib import Path
-from typing import Optional
 
 import fitz  # PyMuPDF
 from PIL import Image
 
 from ..core.plugin_base import DiffOptions, DiffPlugin, DiffResult
-from ..utils.image_ops import compute_ssim, downsample_image
+from ..utils.image_ops import compute_ssim
 
 
 class PdfDiffPlugin(DiffPlugin):
@@ -90,7 +90,7 @@ class PdfDiffPlugin(DiffPlugin):
         else:
             avg_similarity = 0.0
 
-        changed = avg_similarity < 0.99 or pages_added or pages_removed or any(
+        changed = avg_similarity < options.similarity_threshold or pages_added or pages_removed or any(
             p["text_changed"] for p in page_results
         )
 
@@ -266,7 +266,7 @@ class PdfDiffPlugin(DiffPlugin):
                 html_parts.extend([
                     '                <details>',
                     '                    <summary>View text diff</summary>',
-                    f'                    <pre>{page["text_diff"]}</pre>',
+                    f'                    <pre>{escape(page["text_diff"])}</pre>',
                     '                </details>',
                 ])
             html_parts.extend([
